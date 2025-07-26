@@ -14,6 +14,14 @@ We are building a **comprehensive Kubernetes platform** with two main components
 ## Core Purpose
 Automated Kubernetes cluster deployment with optional components for teams who want enterprise-grade infrastructure without complexity.
 
+
+- **Component Selection Interface**:
+  - ✅ **Kubernetes (RKE2)** - Always required base
+  - 🎛️ **Rancher** - Optional cluster management UI
+  - 🚀 **ArgoCD** - Optional GitOps deployments  
+  - 🔧 **Tekton** - Optional CI pipelines
+  - 🐳 **Harbor** - Optional private container registry
+
 ### **Interactive Cluster Setup**
 - **Node Configuration**:
   - Master node IP input with validation
@@ -22,12 +30,6 @@ Automated Kubernetes cluster deployment with optional components for teams who w
   - SSH credential management per node
   - Sudo password configuration
 
-- **Component Selection Interface**:
-  - ✅ **Kubernetes (RKE2)** - Always required base
-  - 🎛️ **Rancher** - Optional cluster management UI
-  - 🚀 **ArgoCD** - Optional GitOps deployments  
-  - 🔧 **Tekton** - Optional CI pipelines
-  - 🐳 **Harbor** - Optional private container registry
 
 ### **Network Configuration**
 - **CIDR Management**:
@@ -299,94 +301,83 @@ Applications → Run on Kubernetes cluster → Managed through web UI
 ### **Interactive Cluster Configuration Form** (Exact prompts from `./deploy.sh edit`)
 
 ```
+=== Node Credentials ===
+--- Master Node (192.168.2.250) ---
+Enter SSH username for master (default: root): root
+Enter SSH password for master (root@192.168.2.250):
+Enter sudo password for master (press Enter if same as SSH):
+--- Worker 1 (192.168.2.191) ---
+Enter SSH username for worker 1 (default: root): root
+Enter SSH password for worker 1 (root@192.168.2.191):
+Enter sudo password for worker 1 (press Enter if same as SSH):
+
+=== Component Configuration ===
+--- Rancher Configuration ---
+Enter Rancher admin username (default: admin): admin
+Enter Rancher admin password:
+
+=== Network Configuration ===
+Enter Pod CIDR (default: 10.42.0.0/16):
+Enter Service CIDR (default: 10.43.0.0/16):
+Enter Cluster DNS IP (default: 10.43.0.10):
+✅ Cluster configuration created!
+
+📋 Summary:
+   Master: root@192.168.2.250
+   Workers:
+     Worker 1: root@192.168.2.191
+   Components Selected:
+     ✅ Kubernetes (RKE2) - Base cluster
+     ✅ Rancher - Cluster management
+     ✅ ArgoCD - GitOps deployments
+     ❌ Tekton - Skipped
+     ❌ Harbor - Skipped
+   Rancher Admin: admin
+   Pod CIDR: 10.42.0.0/16
+   Service CIDR: 10.43.0.0/16
+   Cluster DNS: 10.43.0.10
+   Files created:
+     - /root/ansible-rke2/inventory.ini
+     - /root/ansible-rke2/group_vars/all/vault.yml
+     - group_vars/all.yml
+Let's configure your cluster step by step:
+
 === Cluster Nodes ===
-├── "Enter master node IP": [Text Input] (Required)
-│   ├── Placeholder: "192.168.1.100"
-│   ├── Validation: Valid IP format
-│   └── Help Text: "IP address of your master node"
-│
-├── "Enter number of worker nodes (1-10)": [Number Slider] (Required)
-│   ├── Range: 1-10
-│   ├── Default: 2
-│   └── Help Text: "Number of worker nodes to add"
-│
-└── For Each Worker (Dynamic):
-    └── "Enter worker {i} IP": [Text Input] (Required)
-        ├── Placeholder: "192.168.1.101"
-        └── Validation: Valid IP format
+Enter master node IP: 192.168.2.250
+Enter number of worker nodes (1-10): 1
+Enter worker 1 IP: 192.168.2.191
 
 === Platform Components ===
 Choose which components to install on your cluster:
-├── "✅ Kubernetes (RKE2) - Required base installation" [Always Checked, Disabled]
-├── "Install Rancher for cluster management? (Y/n)": [Toggle Switch] (Default: Y)
-├── "Install ArgoCD for GitOps deployments? (Note: You can self-manage CD deployments) (Y/n)": [Toggle Switch] (Default: Y)
-├── "Install Tekton for CI pipelines? (Note: Self-manage CI deployments) (Y/n)": [Toggle Switch] (Default: Y)
-└── "Install Harbor private registry? (Y/n)": [Toggle Switch] (Default: Y)
+
+✅ Kubernetes (RKE2) - Required base installation
+Install Rancher for cluster management? (Y/n): y
+Install ArgoCD for GitOps deployments? (Note: You can self-manage CD deployments) (Y/n): y
+Install Tekton for CI pipelines? (Note: Self-manage CI deployments) (Y/n): n
+Install Harbor private registry? (Y/n): n
 
 === Node Credentials ===
-Master Node ({master_ip}):
-├── "Enter SSH username for master (default: root)": [Text Input] (Required)
-│   ├── Default: "root"
-│   └── Validation: Alphanumeric and underscore only
-│
-├── "Enter SSH password for master ({username}@{ip})": [Password Input] (Required)
-│   └── Validation: Minimum 8 characters
-│
-└── "Enter sudo password for master (press Enter if same as SSH)": [Password Input] (Optional)
-    └── Help Text: "Leave blank if same as SSH password"
+--- Master Node (192.168.2.250) ---
+Enter SSH username for master (default: root): root
+Enter SSH password for master (root@192.168.2.250):
+Enter sudo password for master (press Enter if same as SSH):
+--- Worker 1 (192.168.2.191) ---
+Enter SSH username for worker 1 (default: root): root
+Enter SSH password for worker 1 (root@192.168.2.191):
+Enter sudo password for worker 1 (press Enter if same as SSH):
 
-For Each Worker ({worker_ip}):
-├── "Enter SSH username for worker {i} (default: {master_username})": [Text Input] (Required)
-│   ├── Default: Same as master username
-│   └── Validation: Alphanumeric and underscore only
-│
-├── "Enter SSH password for worker {i} ({username}@{ip})": [Password Input] (Required)
-│   └── Validation: Minimum 8 characters
-│
-└── "Enter sudo password for worker {i} (press Enter if same as SSH)": [Password Input] (Optional)
-    └── Help Text: "Leave blank if same as SSH password"
-
-=== Component Configuration === (Conditional based on selections)
-Rancher Configuration (if Rancher enabled):
-├── "Enter Rancher admin username (default: admin)": [Text Input] (Required)
-│   ├── Default: "admin"
-│   └── Validation: Alphanumeric only
-│
-└── "Enter Rancher admin password": [Password Input] (Required)
-    ├── Validation: Minimum 12 characters
-    └── Help Text: "Strong password for Rancher admin access"
-
-Harbor Configuration (if Harbor enabled):
-├── "Enter Harbor admin password": [Password Input] (Required)
-│   ├── Default: "Secure auto-generated password"
-│   ├── Validation: Minimum 8 characters
-│   └── Help Text: "Strong password for Harbor admin access (configurable)"
-│
-├── "Enter Harbor database password": [Password Input] (Required)
-│   ├── Default: "Secure auto-generated password"
-│   ├── Validation: Minimum 8 characters
-│   └── Help Text: "Database password (configurable)"
-│
-└── "Enter Harbor Redis password": [Password Input] (Required)
-    ├── Default: "Secure auto-generated password"
-    ├── Validation: Minimum 8 characters
-    └── Help Text: "Redis password (configurable)"
+=== Component Configuration ===
+--- Rancher Configuration ---
+Enter Rancher admin username (default: admin): admin
+Enter Rancher admin password:
 
 === Network Configuration ===
-├── "Enter Pod CIDR (default: 10.42.0.0/16)": [Text Input] (Required)
-│   ├── Default: "10.42.0.0/16"
-│   ├── Validation: Valid CIDR format
-│   └── Help Text: "IP range for pods in the cluster"
-│
-├── "Enter Service CIDR (default: 10.43.0.0/16)": [Text Input] (Required)
-│   ├── Default: "10.43.0.0/16"
-│   ├── Validation: Valid CIDR format
-│   └── Help Text: "IP range for services in the cluster"
-│
-└── "Enter Cluster DNS IP (default: 10.43.0.10)": [Text Input] (Required)
-    ├── Default: "10.43.0.10"
-    ├── Validation: Valid IP format
-    └── Help Text: "DNS server IP for cluster internal resolution"
+Enter Pod CIDR (default: 10.42.0.0/16):
+Enter Service CIDR (default: 10.43.0.0/16):
+Enter Cluster DNS IP (default: 10.43.0.10):
+Encryption successful
+✅ Vault configuration complete!
+
 
 Final Summary Display:
 ├── Master: {username}@{ip}
@@ -397,6 +388,10 @@ Final Summary Display:
 ├── Service CIDR: {cidr}
 ├── Cluster DNS: {ip}
 └── Files created: inventory.ini, vault.yml, group_vars/all.yml
+
+Deploy button
+Shell opens in same screen for real time updates
+
 ```
 
 ## Part 2: Simple CI/CD Platform UI Fields
